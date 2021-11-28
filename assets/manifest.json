@@ -1,0 +1,33 @@
+{
+  "short_name": "Chat Global",
+  "name": "Chat Global - El bot de interchat",
+  "icons": [
+    {
+      "src": "https://cdn.chatglobal.ml/assets/favicon.ico",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.chatglobal.ml/assets/favicon.ico",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/?source=pwa",
+  "background_color": "#5865F2",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#5865F2",
+  "shortcuts": [
+  ],
+  "description": "El bot de interchat de Discord.",
+  "screenshots": [
+    {
+      "src": "https://cdn.chatglobal.ml/assets/favicon.ico",
+      "type": "image/png",
+      "sizes": "540x720"
+    }
+  ]
+}

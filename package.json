@@ -1,0 +1,19 @@
+{
+  "name": "chat-global-status",
+  "version": "1.0.0",
+  "description": "Chat Global Status Page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "tnfAngel",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^3.11.0",
+    "axios": "^0.24.0",
+    "download": "^8.0.0",
+    "express": "^4.17.1",
+    "nsfwjs": "^2.4.1"
+  }
+}
