@@ -1,11 +1,11 @@
 const { node } = require('@tensorflow/tfjs-node');
 const { load: loadNSFW } = require('nsfwjs');
+const { get: httpGet } = require('axios');
 const { createServer } = require('http');
 const download = require('download');
 const { existsSync } = require('fs');
 const express = require('express');
 const { join } = require('path');
-const { get } = require('axios');
 
 const app = express();
 const server = createServer(app);
@@ -113,7 +113,7 @@ app.post('/post', async (req: any, res: any) => {
 
 	const path = `${shortPath}${fullFile}`;
 
-	const pic = await get(body.url, {
+	const pic = await httpGet(body.url, {
 		responseType: 'arraybuffer'
 	});
 
