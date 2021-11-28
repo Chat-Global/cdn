@@ -1,10 +1,8 @@
-const { node } = require('@tensorflow/tfjs-node');
-const { load: loadNSFW } = require('nsfwjs');
-const { get: httpGet } = require('axios');
+const { existsSync, unlinkSync, createWriteStream } = require('fs');
+const { get: httpGet } = require('https');
 const { createServer } = require('http');
-const download = require('download');
-const { existsSync } = require('fs');
 const express = require('express');
+const { nsfw } = require('unscan');
 const { join } = require('path');
 
 const app = express();
@@ -12,7 +10,7 @@ const server = createServer(app);
 
 const port = process.env.PORT || 4000;
 
-const { apiKey } = require('./config')
+const { apiKey } = require('./config');
 
 // Settings
 app.set('port', port);
@@ -105,7 +103,7 @@ app.post('/post', async (req: any, res: any) => {
 
 	const fileName = body.url.substring(body.url.lastIndexOf('/') + 1);
 
-	const shortPath = `./files/`;
+	const shortPath = './attachments/';
 
 	const fullFile = createID(
 		Math.floor(Math.random() * 4 + 2),
@@ -115,32 +113,56 @@ app.post('/post', async (req: any, res: any) => {
 
 	const path = `${shortPath}${fullFile}`;
 
-	const pic = await httpGet(body.url, {
-		responseType: 'arraybuffer'
-	});
+	const download = (url: string, dest: string) =>
+		new Promise((resolve, reject) => {
+			const file = createWriteStream(dest, { flags: 'wx' });
+			const request = httpGet(url, (response: any) => {
 
-	try {
-		const model = await loadNSFW();
-		const image = await node.decodeImage(pic.data, 3);
-		const predictions = await model.classify(image);
-
-		image.dispose();
-
-		if (
-			predictions[0].className != 'Neutral' &&
-			predictions[0].className != 'Drawing'
-		) {
-			return res.status(200).json({
-				text: 'NSFW Detected.',
-				url: 'https://cdn.chatglobal.ml/assets/navi.png',
-				status: 200
+				if (response.statusCode === 200) {
+					response.pipe(file);
+				} else {
+					file.close();
+					unlinkSync(dest);
+					reject(
+						`Server responded with ${response.statusCode}: ${response.statusMessage}`
+					);
+				}
 			});
-		}
-	} catch (err) {
-		void 0;
-	}
+
+			request.on('error', (err: any) => {
+				file.close();
+				unlinkSync(dest);
+				reject(err.message);
+			});
+
+			file.on('finish', () => {
+				resolve('Success');
+			});
+
+			file.on('error', (err: any) => {
+				file.close();
+
+				if (err.code === 'EEXIST') {
+					reject('File already exists');
+				} else {
+					unlinkSync(dest);
+					reject(err.message);
+				}
+			});
+		});
 
 	const downloadResponse = await download(body.url, path).catch(() => false);
+
+	const nsfwRes = await nsfw.file(path).catch(() => false);
+    
+	if (nsfwRes && nsfwRes.nsfw) {
+        console.log(`NSFW Content detected ==> ${fullFile}`);
+		return res.status(200).json({
+			text: 'NSFW Content detected.',
+			url: 'https://cdn.chatglobal.ml/assets/navi.png',
+			status: 200
+		});
+	}
 
 	if (downloadResponse) {
 		return res.status(200).json({
@@ -152,19 +174,19 @@ app.post('/post', async (req: any, res: any) => {
 		return res.status(500).json({
 			text: 'Internal server error.',
 			url: `https://cdn.chatglobal.ml/attachments/${fullFile}`,
-			status: 200
+			status: 500
 		});
 	}
 });
 
 app.use((req: any, res: any, next: any) => {
-    const error: any = new Error('Not Found.');
-    error.status = 404;
-    next(error);
+	const error: any = new Error('Not Found.');
+	error.status = 404;
+	next(error);
 });
 
 app.use((error: any, req: any, res: any, next: any) => {
-    res.status(404).send('404: Not found.');
+	res.status(404).send('404: Not found.');
 });
 
 // Starting the server
