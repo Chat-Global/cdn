@@ -12,6 +12,8 @@ const server = createServer(app);
 
 const port = process.env.PORT || 4000;
 
+const { apiKey } = require('./config')
+
 // Settings
 app.set('port', port);
 app.set('json spaces', 2);
@@ -89,7 +91,7 @@ app.post('/post', async (req: any, res: any) => {
 			status: 400
 		});
 
-	if (headers.api_key != process.env.API_KEY)
+	if (headers.api_key != apiKey)
 		return res.status(401).json({
 			error: 'Invalid API_KEY provided.',
 			status: 401

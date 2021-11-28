@@ -1,7 +1,7 @@
 {
-  "name": "chat-global-status",
+  "name": "chat-global-cdb",
   "version": "1.0.0",
-  "description": "Chat Global Status Page",
+  "description": "Chat Global CDN",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

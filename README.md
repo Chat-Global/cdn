@@ -1,1 +1,1 @@
-# Chat Global Status
+# Chat Global CDN
